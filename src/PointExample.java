@@ -1,18 +1,22 @@
 package practice;
 
 import java.awt.*;
-
 import java.awt.event.*;
-import java.util.Vector;
-
 import javax.swing.*;
+import java.util.Vector;
 
 public class PointExample extends JFrame {
 
 	public PointExample() {
 		super("START");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setContentPane(new JPanelDrawLineTool());
+
+		Container container = getContentPane();
+		JPanel workingArea = new JPanelDrawLineTool();
+		JPanel menu = new JPanelMenu();
+
+		container.add(workingArea, BorderLayout.CENTER);
+		container.add(menu, BorderLayout.NORTH);
 
 		setSize(320, 200);
 		setVisible(true);
@@ -26,9 +30,9 @@ public class PointExample extends JFrame {
 class JPanelDrawLineTool extends JPanel {
 	Vector<Point> pointList = new Vector<Point>();
 	Color c;
+	public static boolean bold = false;
 
 	public JPanelDrawLineTool() {
-		pointList.add(new Point(-1, 0));
 		NewMouseListener listener = new NewMouseListener();
 
 		addMouseListener(listener);
@@ -39,23 +43,11 @@ class JPanelDrawLineTool extends JPanel {
 		requestFocus();
 	}
 
-	class NewMouseListener implements MouseListener, MouseMotionListener {
-
-		public void mousePressed(MouseEvent e) {
-		}
+	class NewMouseListener extends MouseAdapter {
 
 		public void mouseReleased(MouseEvent e) {
-			Point nullPoint = new Point(0, 0);
-			pointList.add(nullPoint);
-		}
-
-		public void mouseClicked(MouseEvent e) {
-		}
-
-		public void mouseEntered(MouseEvent e) {
-		}
-
-		public void mouseExited(MouseEvent e) {
+			Point stopPoint = new Point(0, 0);
+			pointList.add(stopPoint);
 		}
 
 		public void mouseDragged(MouseEvent e) {
@@ -63,37 +55,38 @@ class JPanelDrawLineTool extends JPanel {
 			pointList.add(newPoint);
 			repaint();
 		}
-
-		public void mouseMoved(MouseEvent e) {
-		}
-
 	}
 
 	class NewKeyListener extends KeyAdapter {
 		public void keyPressed(KeyEvent e) {
 			int keyCode = e.getKeyCode();
 			switch (keyCode) {
+
 			case KeyEvent.VK_1:
 				Point black = new Point(-1, 0);
 				pointList.add(black);
 				repaint();
 				break;
+
 			case KeyEvent.VK_2:
 				Point red = new Point(-2, 0);
 				pointList.add(red);
 				repaint();
 				break;
+
 			case KeyEvent.VK_3:
 				Point green = new Point(-3, 0);
 				pointList.add(green);
 				repaint();
 				break;
+
 			case KeyEvent.VK_4:
 				Point blue = new Point(-4, 0);
 				pointList.add(blue);
 				repaint();
 				break;
-			case KeyEvent.VK_0:
+
+			case KeyEvent.VK_5:
 				Point white = new Point(-5, 0);
 				pointList.add(white);
 				repaint();
@@ -106,41 +99,61 @@ class JPanelDrawLineTool extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		g.setColor(Color.BLACK);
 
-		for (int i = -1; i < pointList.size() - 1; i++) {
-			if (pointList.elementAt(i + 1).getX() < 0) {
-				switch ((int) pointList.elementAt(i + 1).getX()) {
+		for (int i = 0; i < pointList.size() - 1; i++) {
+			if (pointList.elementAt(i).getX() > 0 && pointList.elementAt(i + 1).getX() > 0) {
+
+				Point startPoint = pointList.elementAt(i);
+				Point endPoint = pointList.elementAt(i + 1);
+				g.drawLine((int) startPoint.getX(), (int) startPoint.getY(), (int) endPoint.getX(),
+						(int) endPoint.getY());
+			}
+
+			else if (pointList.elementAt(i).getX() <= 0) {
+				switch ((int) pointList.elementAt(i).getX()) {
 				case -1:
 					c = Color.BLACK;
-					i = i + 2;
 					break;
 				case -2:
 					c = Color.RED;
-					i = i + 2;
 					break;
 				case -3:
 					c = Color.GREEN;
-					i = i + 2;
 					break;
 				case -4:
 					c = Color.BLUE;
-					i = i + 2;
 					break;
 				case -5:
 					c = Color.WHITE;
-					i = i + 2;
 					break;
 				}
-				continue;
+				g.setColor(c);
 			}
-			else if (pointList.elementAt(i + 1).getX() == 0 && pointList.elementAt(i + 1).getY() == 0) {
-				i = i + 2;
-				continue;
-			}
-			g.setColor(c);
-			Point startPoint = pointList.elementAt(i);
-			Point endPoint = pointList.elementAt(i + 1);
-			g.drawLine((int) startPoint.getX(), (int) startPoint.getY(), (int) endPoint.getX(), (int) endPoint.getY());
 		}
+
+	}
+}
+
+class JPanelMenu extends JPanel {
+	public JPanelMenu() {
+		JButton button = new JButton("Bold");
+		add(button);
+		setBackground(Color.DARK_GRAY);
+		button.addMouseListener(new NeewMouseListener());
+	}
+
+	class NeewMouseListener extends MouseAdapter {
+		public void mouseClicked(MouseEvent e) {
+			if (JPanelDrawLineTool.bold == false) {
+				JPanelDrawLineTool.bold = true;
+				setBackground(Color.BLACK);
+			} else {
+				JPanelDrawLineTool.bold = false;
+				setBackground(Color.DARK_GRAY);
+
+			}
+		}
+
 	}
 }
