@@ -1,12 +1,10 @@
-package practice;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Vector;
+import java.awt.geom.*;
 
 public class PointExample extends JFrame {
-
 	public PointExample() {
 		super("START");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,8 +27,11 @@ public class PointExample extends JFrame {
 
 class JPanelDrawLineTool extends JPanel {
 	Vector<Point> pointList = new Vector<Point>();
-	Color c;
-	public static boolean bold = false;
+	static int thickness = 1, size=1;
+
+	Color selectedColor;
+	Graphics g;
+	Graphics2D g2;
 
 	public JPanelDrawLineTool() {
 		NewMouseListener listener = new NewMouseListener();
@@ -44,6 +45,10 @@ class JPanelDrawLineTool extends JPanel {
 	}
 
 	class NewMouseListener extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+			Point newPoint = e.getPoint();
+			pointList.add(newPoint);
+		}
 
 		public void mouseReleased(MouseEvent e) {
 			Point stopPoint = new Point(0, 0);
@@ -51,9 +56,24 @@ class JPanelDrawLineTool extends JPanel {
 		}
 
 		public void mouseDragged(MouseEvent e) {
+			g=getGraphics();
+			g2=(Graphics2D) g;
+			
 			Point newPoint = e.getPoint();
 			pointList.add(newPoint);
-			repaint();
+			System.out.println(pointList.size());
+
+			Point start = pointList.elementAt(pointList.size() - 2);
+			Point end = pointList.elementAt(pointList.size() - 1);
+			
+			g.setColor(selectedColor);
+			g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, 0));
+			g2.draw(new Line2D.Double(start.getX(), start.getY(), end.getX(), end.getY()));
+		}
+		public void mouseClicked(MouseEvent e) {
+			g=getGraphics();
+			
+			g.fillOval(e.getX(), e.getY(), size, size);
 		}
 	}
 
@@ -63,73 +83,26 @@ class JPanelDrawLineTool extends JPanel {
 			switch (keyCode) {
 
 			case KeyEvent.VK_1:
-				Point black = new Point(-1, 0);
-				pointList.add(black);
-				repaint();
+				selectedColor=Color.BLACK;
 				break;
 
 			case KeyEvent.VK_2:
-				Point red = new Point(-2, 0);
-				pointList.add(red);
-				repaint();
+				selectedColor=Color.RED;
 				break;
 
 			case KeyEvent.VK_3:
-				Point green = new Point(-3, 0);
-				pointList.add(green);
-				repaint();
+				selectedColor=Color.GREEN;
 				break;
 
 			case KeyEvent.VK_4:
-				Point blue = new Point(-4, 0);
-				pointList.add(blue);
-				repaint();
+				selectedColor=Color.BLUE;
 				break;
 
 			case KeyEvent.VK_5:
-				Point white = new Point(-5, 0);
-				pointList.add(white);
-				repaint();
+				selectedColor=Color.WHITE;
 				break;
 			}
 
-		}
-
-	}
-
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		g.setColor(Color.BLACK);
-
-		for (int i = 0; i < pointList.size() - 1; i++) {
-			if (pointList.elementAt(i).getX() > 0 && pointList.elementAt(i + 1).getX() > 0) {
-
-				Point startPoint = pointList.elementAt(i);
-				Point endPoint = pointList.elementAt(i + 1);
-				g.drawLine((int) startPoint.getX(), (int) startPoint.getY(), (int) endPoint.getX(),
-						(int) endPoint.getY());
-			}
-
-			else if (pointList.elementAt(i).getX() <= 0) {
-				switch ((int) pointList.elementAt(i).getX()) {
-				case -1:
-					c = Color.BLACK;
-					break;
-				case -2:
-					c = Color.RED;
-					break;
-				case -3:
-					c = Color.GREEN;
-					break;
-				case -4:
-					c = Color.BLUE;
-					break;
-				case -5:
-					c = Color.WHITE;
-					break;
-				}
-				g.setColor(c);
-			}
 		}
 
 	}
@@ -137,23 +110,32 @@ class JPanelDrawLineTool extends JPanel {
 
 class JPanelMenu extends JPanel {
 	public JPanelMenu() {
-		JButton button = new JButton("Bold");
+		JButton button = new JButton("Light");
 		add(button);
 		setBackground(Color.DARK_GRAY);
-		button.addMouseListener(new NeewMouseListener());
+		button.addActionListener(new NeewMouseListener());
 	}
 
-	class NeewMouseListener extends MouseAdapter {
-		public void mouseClicked(MouseEvent e) {
-			if (JPanelDrawLineTool.bold == false) {
-				JPanelDrawLineTool.bold = true;
-				setBackground(Color.BLACK);
-			} else {
-				JPanelDrawLineTool.bold = false;
-				setBackground(Color.DARK_GRAY);
-
+	class NeewMouseListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			JButton g = (JButton) e.getSource();
+			if (g.getText().equals("Light")) {
+				JPanelDrawLineTool.thickness = 3;
+				JPanelDrawLineTool.size=3;
+				g.setText("Medium");
+			} else if (g.getText().equals("Medium")) {
+				JPanelDrawLineTool.thickness = 5;
+				JPanelDrawLineTool.size=5;
+				g.setText("Bold");
+			} else if (g.getText().equals("Bold")) {
+				JPanelDrawLineTool.thickness = 10;
+				JPanelDrawLineTool.size=10;
+				g.setText("Extra");
+			} else if (g.getText().equals("Extra")) {
+				JPanelDrawLineTool.thickness = 1;
+				JPanelDrawLineTool.size=1;
+				g.setText("Light");
 			}
 		}
-
 	}
 }
